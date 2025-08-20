@@ -4,10 +4,14 @@ const taskModel = require("../models/taskModel");
 exports.createTask = async (req, res, next) => {
   const { title, details, deadLine, name } = req.body;
   const date = new Date(deadLine);
-  console.log(date.getTime());
-  // console.log(dateDeadLine instanceof Date);
-  if (date < Date.now()) {
-    const error = new Error("deadline should be present");
+  console.log(new Date());
+  if (isNaN(date.getTime())) {
+    const error = new Error("Invalid date format");
+    error.status = 400;
+    return next(error);
+  }
+  if (date < new Date()) {
+    const error = new Error("deadline must be in future");
     error.status = 400;
     return next(error);
   }
@@ -50,10 +54,21 @@ exports.getAllTask = async (req, res, next) => {
 exports.updateTask = async (req, res, next) => {
   try {
     const { title, details, deadLine, isCompleted } = req.body;
+    const date = new Date(deadLine);
+    if (isNaN(date.getTime())) {
+      const error = new Error("Invalid date format");
+      error.status = 400;
+      return next(error);
+    }
+    if (date < new Date()) {
+      const error = new Error("deadline must be in future");
+      error.status = 400;
+      return next(error);
+    }
     const { taskId } = req.params;
     const { id } = req.user;
     const task = await taskModel.findOne({ _id: taskId, user: id });
-    console.log(task);
+    // console.log(task);
     if (!task) {
       const error = new Error("No task");
       error.status = 404;
@@ -61,7 +76,7 @@ exports.updateTask = async (req, res, next) => {
     }
     await taskModel.findByIdAndUpdate(
       taskId,
-      { title, details, deadLine, isCompleted },
+      { title, details, deadLine: date, isCompleted },
       { new: true, runValidators: true }
     );
     return res.status(200).json({ message: "task updated successfully" });
