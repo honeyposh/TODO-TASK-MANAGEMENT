@@ -9,12 +9,13 @@ const userRoute = require("./routes/userRoute");
 const subTaskRoute = require("./routes/subTaskRoute");
 const cookieParser = require("cookie-parser");
 // const subTaskModel = require("./models/subTaskModel");
+
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to db");
     app.listen(port, () => {
-      console.log(`Server listening on port {PORT}`);
+      console.log(`Server listening on port ${port}`);
     });
   })
   .catch((error) => {
